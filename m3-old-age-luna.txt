@@ -1,0 +1,73 @@
+
+% --------------------------------------------------------------------------------
+%
+% Instruct cache which metrics to record (for final PREDICT)
+%
+% --------------------------------------------------------------------------------
+
+
+CACHE cache=p1 record=PSD,PSD,B,CH,STG
+CACHE cache=p1 record=SPINDLES,COUPL_OVERLAP,F,CH,STG
+CACHE cache=p1 record=SPINDLES,ISA_T,F,CH,STG
+CACHE cache=p1 record=SPINDLES,SEC_AMP,F,CH,STG
+CACHE cache=p1 record=SPINDLES,FWHM,F,CH,STG
+CACHE cache=p1 record=SPINDLES,COUPL_MAG_Z,F,CH,STG
+CACHE cache=p1 record=SPINDLES,COUPL_OVERLAP_Z,F,CH,STG
+
+
+
+% --------------------------------------------------------------------------------
+%
+% Pre-processing EEGs (1 central channel, uV, SR 125 Hz) 
+%
+% --------------------------------------------------------------------------------
+
+
+RESAMPLE sig=${cen} sr=125
+
+uV sig=${cen}
+
+FILTER sig=${cen} bandpass=0.3,30 tw=1 ripple=0.02 fs=125 fft
+
+CHEP-MASK sig=${cen} flat=0.1 clipped=0.1 max=100,0.2
+CHEP-MASK sig=${cen}  max=250,0.01
+CHEP-MASK sig=${cen}  ep-th=4,4
+CHEP epochs sig=${cen}
+RE preserve-cache
+
+
+% --------------------------------------------------------------------------------
+%
+% N2N3 metrics
+%
+% --------------------------------------------------------------------------------
+
+TAG STG/N2N3
+MASK mask-ifnot=N2,N3
+RE preserve-cache
+EPOCH require=10
+
+PSD sig=${cen} spectrum max=25 dB peaks slowing total=0.5-30
+
+SPINDLES sig=${cen} fc=11,15 median th=6 ignore-neg-peak so mag=2 nreps=1000
+
+
+
+% --------------------------------------------------------------------------------
+%
+% clean up, check cache
+%
+% --------------------------------------------------------------------------------
+
+TAG STG/.
+
+CACHE dump num=p1
+
+
+% --------------------------------------------------------------------------------
+%
+% Final prediction
+%
+% --------------------------------------------------------------------------------
+
+PREDICT model=${mpath}/m3-old-age-features.txt data=${mpath}/m3-old-age-data.txt cache=p1 th=4

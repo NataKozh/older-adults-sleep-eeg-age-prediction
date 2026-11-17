@@ -1,0 +1,66 @@
+
+% ------------------------------------------------------------
+% model descriptors
+%
+
+title      <- "Age prediction (older adults)"
+reference  <- "TBD"
+training   <- "70% SHHS dataset (total N=5,793), Linear regression"
+outcome    <- "Age (years)"
+type       <- "linear"
+
+data       <- "m3-old-age-data.txt"
+knn        <- 10 
+minf       <- 4 
+softplus   <- 0
+log1p      <- 0
+
+% ------------------------------------------------------------
+% requirements:
+%
+%  signals   : 1 central EEG (contralateral mastoid ref., SR = 125 Hz, uV units )
+%  filtering : bandpass 0.3-30 Hz
+%  epochwise artifact rejection: flat or |amplitude| > 500 uV
+
+% ------------------------------------------------------------
+
+COUPL_OVERLAP_15_C_N2N3
+   CMD=SPINDLES   VAR=COUPL_OVERLAP   STRATA=F/15,STG/N2N3   CH=${cen}
+   b=-2.61227507268189   m=203.502007024586   sd=149.64525218535
+
+
+ISA_S_15_C_N2N3
+   CMD=SPINDLES   VAR=ISA_T   STRATA=F/15,STG/N2N3   CH=${cen}
+   b=1.02658046178369   m=1.64527713589251   sd=0.446203259884278
+
+
+SEC_AMP_15_C_N2N3
+   CMD=SPINDLES   VAR=SEC_AMP   STRATA=F/15,STG/N2N3   CH=${cen}
+   b=-2.36740863670153   m=0.43374543359173   sd=0.0449947510971423
+
+
+PSD_FAST_SIGMA_C_N2N3
+   CMD=PSD   VAR=PSD   STRATA=B/FAST_SIGMA,STG/N2N3   CH=${cen}
+   b=-1.30554722970821   m=6.21320434724073   sd=2.45568492902394
+
+
+COUPL_MAG_Z_11_C_N2N3
+   CMD=SPINDLES   VAR=COUPL_MAG_Z   STRATA=F/11,STG/N2N3   CH=${cen}
+   b=-1.17818453624197   m=3.61422804093616   sd=2.88514589613582
+
+
+COUPL_OVERLAP_Z_11_C_N2N3
+   CMD=SPINDLES   VAR=COUPL_OVERLAP_Z   STRATA=F/11,STG/N2N3   CH=${cen}
+   b=-1.42123248489345   m=2.91325676989813   sd=0.988042070915877
+
+% ------------------------------------------------------------
+% special variables
+
+intercept <- 63.08963548
+
+bias_correction_slope <- -0.7584647467
+
+bias_correction_intercept <- 47.8204549283
+
+bias_correction_term <- ${age}
+
